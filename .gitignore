@@ -1,0 +1,14 @@
+/Release
+/OpenGL_TF.opensdf
+
+OpenGL_TF/Release/main_1.obj
+OpenGL_TF/Release/OpenGL_TF.log
+OpenGL_TF/Release/OpenGL_TF.tlog/cl.command.1.tlog
+OpenGL_TF/Release/OpenGL_TF.tlog/CL.read.1.tlog
+OpenGL_TF/Release/OpenGL_TF.tlog/CL.write.1.tlog
+OpenGL_TF/Release/OpenGL_TF.tlog/link.command.1.tlog
+OpenGL_TF/Release/OpenGL_TF.tlog/link.read.1.tlog
+OpenGL_TF/Release/OpenGL_TF.tlog/link.write.1.tlog
+OpenGL_TF/Release/OpenGL_TF.tlog/OpenGL_TF.lastbuildstate
+OpenGL_TF/Release/Shader.obj
+OpenGL_TF/Release/vc120.pdb
