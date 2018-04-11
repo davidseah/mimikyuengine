@@ -1,9 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-//GLEW
-#define GLEW_STATIC
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 class Shader
 {

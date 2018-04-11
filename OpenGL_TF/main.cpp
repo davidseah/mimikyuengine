@@ -78,7 +78,7 @@ class Mesh
     void setupMesh();
 };
 
-/*
+
 int main()
 {
     // Init GLFW
@@ -341,7 +341,7 @@ int main()
 
     return 0;
 	}
-*/
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
     //when a user presses the escape key, we set the window should close 
