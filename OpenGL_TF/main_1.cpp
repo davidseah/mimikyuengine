@@ -85,7 +85,7 @@ int main()
 
 		float timeValue = glfwGetTime();
 		float greenValue = (sin(timeValue)/2.0f) + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(ourShader.Program, "ourColor");
+		int vertexColorLocation = glGetUniformLocation(ourShader.ID, "ourColor");
 		ourShader.Use();
 		glUniform4f(vertexColorLocation, 0.0f, greenValue, greenValue, 1.0f);
 
