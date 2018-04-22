@@ -1,5 +1,6 @@
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
+#include <SOIL.h>
 
 #include <iostream>
 #include <cmath>
@@ -38,11 +39,11 @@ int main()
 	//vertices
 	float vertices[] =
 	{
-		//position				//color
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 		
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f
+		//position				//color			//texture coords
+		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, //top right	
+		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, //bottom left
+		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, //top right 
 	};
 
 	unsigned int indices[] =
@@ -51,6 +52,32 @@ int main()
 		1, 2, 3 //second traingle
 	};
 
+	float texCoords[]=
+	{
+		0.0f, 0.0f, //lower left corner
+		1.0f, 0.0f, //lower right corner
+		1.0, 0.0f, //top left corner
+		1.0f, 1.0f //top right corner
+	};
+
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	int width, height;
+	unsigned char* data = SOIL_load_image("../container.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+	
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		SOIL_free_image_data(data);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	
 	unsigned int VAO;
 	unsigned int EBO;
 	unsigned int VBO;
@@ -68,12 +95,16 @@ int main()
 	(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	//Position Attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	//color Attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+	//texture coords
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 
 	while (!glfwWindowShouldClose(window))
@@ -89,7 +120,7 @@ int main()
 		ourShader.Use();
 		glUniform4f(vertexColorLocation, 0.0f, greenValue, greenValue, 1.0f);
 
-		
+		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(VAO);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -102,6 +133,10 @@ int main()
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 
 	glfwTerminate();
 	return 0;
