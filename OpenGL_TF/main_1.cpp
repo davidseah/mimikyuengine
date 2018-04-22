@@ -36,6 +36,7 @@ int main()
 	}
 
 	Shader ourShader("../shader.vs", "../shader.frag");
+
 	//vertices
 	float vertices[] =
 	{
@@ -59,24 +60,6 @@ int main()
 		1.0, 0.0f, //top left corner
 		1.0f, 1.0f //top right corner
 	};
-
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	int width, height;
-	unsigned char* data = SOIL_load_image("../container.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-	
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		SOIL_free_image_data(data);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
 	
 	unsigned int VAO;
 	unsigned int EBO;
@@ -106,6 +89,49 @@ int main()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
+	//Create textures
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	int width, height;
+	unsigned char* data = SOIL_load_image("../container.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		SOIL_free_image_data(data);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	unsigned int texture2;
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+
+	int width2, height2;
+	data = SOIL_load_image("../awesomeface.png", &width2, &height2, 0, SOIL_LOAD_RGB);
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		SOIL_free_image_data(data);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	ourShader.Use();
+	ourShader.setInt("ourTexture", 0);
+	ourShader.setInt("texture2", 1);
+
+
+
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -117,10 +143,17 @@ int main()
 		float timeValue = glfwGetTime();
 		float greenValue = (sin(timeValue)/2.0f) + 0.5f;
 		int vertexColorLocation = glGetUniformLocation(ourShader.ID, "ourColor");
-		ourShader.Use();
+	
 		glUniform4f(vertexColorLocation, 0.0f, greenValue, greenValue, 1.0f);
 
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+
+		ourShader.Use();
+
 		glBindVertexArray(VAO);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
