@@ -1,15 +1,49 @@
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
-#include <SOIL.h>
+
+//GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 
 #include <iostream>
 #include <cmath>
+#include <vector>
+#include <string>
 
+#include "Model.h"
 #include "Shader.h"
-
+#include "Camera.h"
+#include "box.h"
+#include "CubeMap.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+//windows size
+const int width = 800;
+const int height = 600;
+
+// camera
+Camera camera(glm::vec3(1.0f, 1.0f, 3.0f));
+float lastX = width / 2.0f;
+float lastY = height / 2.0f;
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f;	// time between current frame and last frame
+float lastFrame = 0.0f;
+
+// lighting
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+std::vector<std::string>faces
+{
+    "C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\darkskies\\darkskies_rt.tga"
+};
 
 int main()
 {
@@ -18,7 +52,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 800, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "Mimikyuengine", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -36,155 +70,160 @@ int main()
 	}
 
 	Shader ourShader("../shader.vs", "../shader.frag");
+    Shader lightShader("../lighting.vs", "../lighting.frag");
+    Shader lampShader("../lamp.vs", "../lamp.frag");
 
-	//vertices
-	float vertices[] =
-	{
-		//position				//color			//texture coords
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, //top right	
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, //bottom left
-		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, //top right 
-	};
+    Model ourModel("c:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\GLTF_MODEL\\duck\\Duck.gltf");
+    //Model light("c:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\GLTF_MODEL\\Box\\Box.gltf");
+    
+    Box lamp;
+    Box light;
 
-	unsigned int indices[] =
-	{
-		0, 1, 3, //first triangle 
-		1, 2, 3 //second traingle
-	};
-
-	float texCoords[]=
-	{
-		0.0f, 0.0f, //lower left corner
-		1.0f, 0.0f, //lower right corner
-		1.0, 0.0f, //top left corner
-		1.0f, 1.0f //top right corner
-	};
-	
-	unsigned int VAO;
-	unsigned int EBO;
-	unsigned int VBO;
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &EBO);
-	glBindVertexArray(VAO);
-
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-	//Position Attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	//color Attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	//texture coords
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	//Create textures
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	int width, height;
-	unsigned char* data = SOIL_load_image("../container.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		SOIL_free_image_data(data);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-
-	unsigned int texture2;
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-
-	int width2, height2;
-	data = SOIL_load_image("../awesomeface.png", &width2, &height2, 0, SOIL_LOAD_RGB);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		SOIL_free_image_data(data);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-
-	ourShader.Use();
-	ourShader.setInt("ourTexture", 0);
-	ourShader.setInt("texture2", 1);
-
-
-
+    unsigned int cubemapTexture = loadCubemap(faces);
 
 	while (!glfwWindowShouldClose(window))
 	{
+        ourShader.Use();
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
 		processInput(window);
 		//Render
+        glEnable(GL_DEPTH_TEST);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		float timeValue = glfwGetTime();
-		float greenValue = (sin(timeValue)/2.0f) + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(ourShader.ID, "ourColor");
-	
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, greenValue, 1.0f);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
-
-		ourShader.Use();
-
-		glBindVertexArray(VAO);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		//Check what is this
-		glBindVertexArray(0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ 
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        //ourShader.setMat4("projection", projection);
+        //ourShader.setMat4("view", view);
 
 
+        if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+        {
+            lightPos.x += 0.1;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+        {
+            lightPos.x -= 0.1;
+        }
+        // render the loaded model
+        glm::mat4 lampmodel;
+        lampmodel = glm::translate(lampmodel, lightPos); // translate it down so it's at the center of the scene
+        lampmodel = glm::scale(lampmodel, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        //ourShader.setMat4("model", model);
+        //ourModel.Draw(ourShader);
+
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        //model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));	// it's a bit too big for our scene, so scale it down
+        //ourShader.setMat4("model", model);
+        //ourMode2.Draw(ourShader);
+        lampShader.Use();
+        lampShader.setMat4("model", lampmodel);
+        lampShader.setMat4("projection", projection);
+        lampShader.setMat4("view", view);
+        lamp.Draw();
+
+        lightShader.Use();
+
+        lightShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        lightShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        lightShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        lightShader.setFloat("material.shininess", 32.0f);
+
+
+        lightShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        lightShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        lightShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
+        lightShader.setVec3("light.position", lightPos);
+        lightShader.setVec3("viewPos", camera.Position);
+
+        //view/projection transformation
+        //projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+        //view = camera.GetViewMatrix();
+        lightShader.setMat4("projection", projection);
+        lightShader.setMat4("view", view);
+        // world transformation
+        glm::mat4 model = glm::mat4();
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	// it's a bit too big for our scene, so scale it down
+
+        lightShader.setMat4("model", model);
+        lightShader.setVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
+
+        light.Draw();
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
-
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
 
 	glfwTerminate();
 	return 0;
 }
 
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow *window)
 {
-	glViewport(0, 0, width, height);
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+    }
 }
 
-void processInput(GLFWwindow* window)
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, true);
-	}
+    // make sure the viewport matches the new window dimensions; note that width and 
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+}
+
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(yoffset);
 }
