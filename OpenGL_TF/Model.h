@@ -4,9 +4,10 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <SOIL.h>
+//#include <SOIL.h>
 #include "Mesh.h"
 
+#include "stb_image.h"
 class Model
 {
 public:
@@ -134,19 +135,24 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene * scene)
 unsigned int TextureFromFile(const char* path, const std::string &directory, bool gamma = false)
 {
     std::string filename = std::string(path);
-    std::string pathname = "c:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\GLTF_MODEL\\duck\\";
+    std::string pathname = "c:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\GLTF_MODEL\\";
     filename = pathname + filename;
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
-    int width, height, nrComponents;
-    unsigned char *data = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
+    int width, height, nrChannels;
+    //unsigned char *data = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
+    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
     if (data)
     {
-        GLenum format = GL_RGBA;
+        GLenum format = GL_RGB;
 
         glBindTexture(GL_TEXTURE_2D, textureID);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -155,7 +161,8 @@ unsigned int TextureFromFile(const char* path, const std::string &directory, boo
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        SOIL_free_image_data(data);
+        //SOIL_free_image_data(data);
+        stbi_image_free(data);
     }
     else
     {

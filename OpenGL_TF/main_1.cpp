@@ -42,7 +42,12 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 std::vector<std::string>faces
 {
-    "C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\darkskies\\darkskies_rt.tga"
+    "C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\darkskies\\darkskies_rt.tga",
+    "C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\darkskies\\darkskies_lf.tga",
+    "C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\darkskies\\darkskies_up.tga",
+    "C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\darkskies\\darkskies_dn.tga",
+    "C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\darkskies\\darkskies_ft.tga",
+    "C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\darkskies\\darkskies_bk.tga"
 };
 
 int main()
@@ -72,10 +77,12 @@ int main()
 	Shader ourShader("../shader.vs", "../shader.frag");
     Shader lightShader("../lighting.vs", "../lighting.frag");
     Shader lampShader("../lamp.vs", "../lamp.frag");
+    //Shader skyboxShader("../cubemap.vs", "../cubemap.frag");
+
 
     Model ourModel("c:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\GLTF_MODEL\\duck\\Duck.gltf");
     //Model light("c:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\GLTF_MODEL\\Box\\Box.gltf");
-    
+    Model SuperModel("C:\\Users\\uidj2545\\Desktop\\mimikyuengine\\mimikyuengine\\GLTF_MODEL\\centurion\\centurion.gltf");
     Box lamp;
     Box light;
 
@@ -96,6 +103,7 @@ int main()
  
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+        
         glm::mat4 view = camera.GetViewMatrix();
         //ourShader.setMat4("projection", projection);
         //ourShader.setMat4("view", view);
@@ -125,16 +133,14 @@ int main()
         lampShader.setMat4("model", lampmodel);
         lampShader.setMat4("projection", projection);
         lampShader.setMat4("view", view);
-        lamp.Draw();
-
+        //lamp.Draw();
+        SuperModel.Draw(ourShader);
         lightShader.Use();
 
         lightShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
         lightShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
         lightShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         lightShader.setFloat("material.shininess", 32.0f);
-
-
         lightShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
         lightShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
@@ -154,7 +160,11 @@ int main()
         lightShader.setMat4("model", model);
         lightShader.setVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
 
-        light.Draw();
+        //light.Draw();
+
+
+
+        
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
