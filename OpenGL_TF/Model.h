@@ -174,6 +174,8 @@ unsigned int TextureFromFile(const char* path, const std::string &directory, boo
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
 {
+    
+
     std::vector<Texture> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
