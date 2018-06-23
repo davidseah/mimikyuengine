@@ -142,7 +142,6 @@ unsigned int TextureFromFile(const char* path, const std::string &directory, boo
     glGenTextures(1, &textureID);
 
     int width, height, nrChannels;
-    //unsigned char *data = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
     if (data)
     {
