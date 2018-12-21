@@ -39,12 +39,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>../include;../SOIL;../imgui;../imgui/examples;$(IncludePath)</IncludePath>
-    <LibraryPath>../glew;../lib-vc2013;../assimp_lib/debug;../SOIL;../imgui;$(LibraryPath)</LibraryPath>
+    <IncludePath>../include;../SOIL;$(IncludePath)</IncludePath>
+    <LibraryPath>../glew;../lib-vc2013;../assimp_lib/debug;../SOIL;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>../include;../SOIL;../include/assimp/;../imgui;../imgui/examples;$(IncludePath)</IncludePath>
-    <LibraryPath>../glew;../lib-vc2013;../SOIL;../assimp_lib/release;../imgui;$(LibraryPath)</LibraryPath>
+    <IncludePath>../include;../SOIL;../include\assimp\;$(IncludePath)</IncludePath>
+    <LibraryPath>../glew;../lib-vc2013;../SOIL;../assimp_lib/release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -73,11 +73,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\imgui\examples\imgui_impl_glfw.cpp" />
-    <ClCompile Include="..\imgui\examples\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\imgui\imgui.cpp" />
-    <ClCompile Include="..\imgui\imgui_demo.cpp" />
-    <ClCompile Include="..\imgui\imgui_draw.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp">
@@ -88,41 +83,19 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="main_blending.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="main_depthtesting.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="main_faceculling.cpp" />
-    <ClCompile Include="main_stenciltesting.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="main_material.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="main_test.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\imgui\examples\imgui_impl_glfw.h" />
-    <ClInclude Include="..\imgui\examples\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\imgui\imgui.h" />
-    <ClInclude Include="..\imgui\imgui_internal.h" />
     <ClInclude Include="box.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Common.h" />
     <ClInclude Include="CubeMap.h" />
-    <ClInclude Include="debugui.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="plane.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
-    <ClInclude Include="transparentVertices.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
