@@ -6,8 +6,8 @@
 
 //#include <SOIL.h>
 #include "Mesh.h"
-
 #include "stb_image.h"
+
 class Model
 {
 public:
